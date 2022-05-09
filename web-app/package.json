@@ -1,0 +1,12 @@
+{
+  "name": "ghost-web-app",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "static"
+  },
+  "dependencies": {
+    "node-static": "^0.7.11"
+  }
+}

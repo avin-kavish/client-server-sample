@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discussions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div class="page-container">
+  <h1 class="comments__header-title">Discussion</h1>
+  <form class="comments__form">
+    <div class="comments__avatar">
+      <img src="/images/avatar-bob.png" />
+    </div>
+    <input
+        name="comment"
+        class="input-outlined flex-1"
+        placeholder="What are your thoughts?"
+    />
+    <button class="button button-primary">
+      Comment
+    </button>
+  </form>
+  <div class="comments__container">
+    <div class="comments__comment-container">
+      <div class="comments__avatar">
+        <img src="/images/avatar-bob.png" />
+      </div>
+      <div class="comments__comment-content-container">
+        <div class="comments__comment-header">
+          <div class="comments__comment-author">
+            Rob Hope
+          </div>
+          <div class="comments__comment-header-separator">
+            ・
+          </div>
+          <div class="comments__comment-time">
+            45 min ago
+          </div>
+        </div>
+        <div class="comments__comment-content-body">
+          Jeepers now that's a huge release with some big community earnings to back it - it must be so rewarding seeing
+          creators quit their day jobs after monetizing (with real MRR) on the new platform.
+        </div>
+        <div class="comments__comment-actions">
+          <button class="button button-text upvote-button">
+            ▲ Upvote
+          </button>
+          <button class="button button-text">
+            Reply
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
