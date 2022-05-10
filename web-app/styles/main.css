@@ -54,7 +54,9 @@ body {
 
 .comments__container {
   margin-top: 42px;
-
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
 }
 
 .comments__avatar {
