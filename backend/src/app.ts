@@ -1,5 +1,6 @@
 import Fastify, { FastifyRequest } from 'fastify'
 import { configureComments } from "./handlers/comments"
+import { configureUsers } from "./handlers/users"
 
 const app = Fastify({
   logger: true
@@ -11,5 +12,7 @@ app.register(require('@fastify/cors'), {
 })
 
 configureComments({ app })
+
+configureUsers({ app })
 
 export default app
