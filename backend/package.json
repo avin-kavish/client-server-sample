@@ -9,6 +9,7 @@
     "dev": "ts-node src/server.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^7.0.0",
     "fastify": "^3.29.0"
   },
   "devDependencies": {
