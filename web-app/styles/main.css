@@ -63,6 +63,12 @@ body {
   width: 30px;
   height: 30px;
   border-radius: 42px;
+  overflow: hidden;
+}
+
+.comments__avatar-img {
+  width: 100%;
+  height: 100%;
 }
 
 .comments__header-title {
