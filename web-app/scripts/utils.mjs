@@ -1,6 +1,12 @@
 
-export async function fetchJson(url) {
-  const res = await fetch(url)
+export async function fetchJson(url, data, method) {
+  const res = await fetch(url, {
+    method,
+    body: data ? JSON.stringify(data) : undefined,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
   if (!res.ok) throw new Error('Fetch error')
   const body  = await res.json()
   return body

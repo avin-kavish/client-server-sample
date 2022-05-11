@@ -106,11 +106,19 @@ body {
 }
 
 .comments__comment-actions {
+  display: flex;
+  align-items: center;
   margin-top: 8px;
 }
 
 .upvote-button {
   padding-left: 0;
+}
+
+.comments__comment-upvotes {
+  font-size: 11px;
+
+  color: #4B587C;
 }
 
 .comments__form {
