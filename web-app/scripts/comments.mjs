@@ -3,56 +3,60 @@ import {fetchJson} from "./utils.mjs";
 
 const currentUser = 1
 
+function renderComment(c, user, upvote) {
+
+  return `
+    <div class="comments__comment-container">
+      <div>
+        <div class="comments__avatar">
+          <img class="comments__avatar-img" src="${user.avatar}" />
+        </div>
+      </div>
+      <div class="comments__comment-content-container">
+        <div class="comments__comment-header">
+          <div class="comments__comment-author">
+            ${user.name}
+          </div>
+          <div class="comments__comment-header-separator">
+            ・
+          </div>
+          <div class="comments__comment-time">
+            ${formatDistanceToNow(new Date(c.createdAt), {addSuffix: true})}
+          </div>
+        </div>
+        <div class="comments__comment-content-body">
+          ${c.body}
+        </div>
+        <div class="comments__comment-actions">
+          <button class="button button-text upvote-button" data-comment-id="${c.id}">
+            ${upvote ? `Upvoted` : `▲ Upvote`}
+          </button>
+          <div class="comments__comment-upvotes" data-comment-id="${c.id}" data-upvotes="${c.upvotes}">
+            ${c.upvotes} upvotes
+          </div>
+          <!--            <button class="button button-text reply-button">-->
+          <!--              Reply-->
+          <!--            </button>-->
+        </div>
+      </div>
+    </div>
+  `
+}
+
 async function loadComments() {
   const {data: comments} = await fetchJson('http://localhost:3000/api/v1/comments')
 
   const {data: upvotes} = await fetchJson(`http://localhost:3000/api/v1/upvotes?userId=${currentUser}`)
 
-  const params = new URLSearchParams(comments.map(c => ['ids', c.userId]))
+  const params = new URLSearchParams([...comments.map(c => ['ids', c.userId]), ['ids', currentUser]])
   const {data: users} = await fetchJson(`http://localhost:3000/api/v1/users?${params}`)
 
   const commentContainer = document.querySelector('.comments__container')
   commentContainer.innerHTML = comments.map(c => {
     const user = users.find(u => u.id === c.userId)
-
     const upvote = upvotes.find(u => u.commentId === c.id)
 
-    return `
-        <div class="comments__comment-container">
-          <div>
-            <div class="comments__avatar">
-              <img class="comments__avatar-img" src="${user.avatar}" />
-            </div>
-          </div>
-          <div class="comments__comment-content-container">
-            <div class="comments__comment-header">
-              <div class="comments__comment-author">
-                ${user.name}
-              </div>
-              <div class="comments__comment-header-separator">
-                ・
-              </div>
-              <div class="comments__comment-time">
-                ${formatDistanceToNow(new Date(c.createdAt), {addSuffix: true})}
-              </div>
-            </div>
-            <div class="comments__comment-content-body">
-              ${c.body}
-            </div>
-            <div class="comments__comment-actions">
-              <button class="button button-text upvote-button" data-comment-id="${c.id}">
-                ${upvote ? `Upvoted` : `▲ Upvote`}
-              </button>
-              <div class="comments__comment-upvotes" data-comment-id="${c.id}" data-upvotes="${c.upvotes}">
-                ${c.upvotes} upvotes
-              </div>
-  <!--            <button class="button button-text reply-button">-->
-  <!--              Reply-->
-  <!--            </button>-->
-            </div>
-          </div>
-        </div>
-      `;
+    return renderComment(c, user, upvote)
   }).join('')
 
   commentContainer.querySelectorAll('.upvote-button').forEach(el => {
@@ -79,6 +83,22 @@ async function loadComments() {
         this.innerHTML = `▲ Upvote`
       }
     })
+  })
+
+  const form = document.querySelector('.comments__form')
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault()
+
+    const comment = this.elements['comment']
+
+    const {data} = await fetchJson(`http://localhost:3000/api/v1/comments`, {body: comment.value, userId: currentUser}, 'POST')
+
+    const user = users.find(u => u.id === currentUser)
+
+    document.querySelector('.comments__container').innerHTML += renderComment(data, user)
+
+    comment.value = ''
   })
 }
 
