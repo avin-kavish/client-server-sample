@@ -4,8 +4,9 @@ import {fetchJson} from "./utils.mjs";
 const currentUser = 1
 
 function renderComment(c, user, upvote) {
+  const div = document.createElement('div')
 
-  return `
+  div.innerHTML = `
     <div class="comments__comment-container">
       <div>
         <div class="comments__avatar">
@@ -41,6 +42,8 @@ function renderComment(c, user, upvote) {
       </div>
     </div>
   `
+
+  return div
 }
 
 async function loadComments() {
@@ -52,37 +55,39 @@ async function loadComments() {
   const {data: users} = await fetchJson(`http://localhost:3000/api/v1/users?${params}`)
 
   const commentContainer = document.querySelector('.comments__container')
-  commentContainer.innerHTML = comments.map(c => {
+  commentContainer.append(...comments.map(c => {
     const user = users.find(u => u.id === c.userId)
     const upvote = upvotes.find(u => u.commentId === c.id)
 
     return renderComment(c, user, upvote)
-  }).join('')
+  }))
+
+  function onUpvote() {
+    const commentId = Number(this.dataset.commentId)
+    const upvoteEl = document.querySelector(`.comments__comment-upvotes[data-comment-id="${commentId}"]`)
+
+    const upvote = upvotes.find(u => u.commentId === commentId)
+    if (!upvote) {
+      const newUpvote = {userId: currentUser, commentId}
+      fetchJson(`http://localhost:3000/api/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
+
+      upvotes.push(newUpvote)
+
+      upvoteEl.innerHTML = `${++upvoteEl.dataset.upvotes} upvotes`
+      this.innerHTML = `Upvoted`
+    } else {
+      fetchJson(`http://localhost:3000/api/v1/comments/${commentId}/upvotes?userId=${currentUser}`, undefined, 'DELETE')
+
+      const idx = upvotes.indexOf(upvote)
+      upvotes.splice(idx, 1)
+
+      upvoteEl.innerHTML = `${--upvoteEl.dataset.upvotes} upvotes`
+      this.innerHTML = `▲ Upvote`
+    }
+  }
 
   commentContainer.querySelectorAll('.upvote-button').forEach(el => {
-    el.addEventListener('click', function () {
-      const commentId = Number(this.dataset.commentId)
-      const upvoteEl = document.querySelector(`.comments__comment-upvotes[data-comment-id="${commentId}"]`)
-
-      const upvote = upvotes.find(u => u.commentId === commentId)
-      if (!upvote) {
-        const newUpvote = {userId: currentUser, commentId}
-        fetchJson(`http://localhost:3000/api/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
-
-        upvotes.push(newUpvote)
-
-        upvoteEl.innerHTML = `${++upvoteEl.dataset.upvotes} upvotes`
-        this.innerHTML = `Upvoted`
-      } else {
-        fetchJson(`http://localhost:3000/api/v1/comments/${commentId}/upvotes?userId=${currentUser}`, undefined, 'DELETE')
-
-        const idx = upvotes.indexOf(upvote)
-        upvotes.splice(idx, 1)
-
-        upvoteEl.innerHTML = `${--upvoteEl.dataset.upvotes} upvotes`
-        this.innerHTML = `▲ Upvote`
-      }
-    })
+    el.addEventListener('click', onUpvote)
   })
 
   const form = document.querySelector('.comments__form')
@@ -90,15 +95,22 @@ async function loadComments() {
   form.addEventListener('submit', async function (event) {
     event.preventDefault()
 
-    const comment = this.elements['comment']
+    const commentInput = this.elements['comment']
 
-    const {data} = await fetchJson(`http://localhost:3000/api/v1/comments`, {body: comment.value, userId: currentUser}, 'POST')
+    const {data} = await fetchJson(`http://localhost:3000/api/v1/comments`, {
+      body: commentInput.value,
+      userId: currentUser
+    }, 'POST')
 
     const user = users.find(u => u.id === currentUser)
 
-    document.querySelector('.comments__container').innerHTML += renderComment(data, user)
+    const container = document.querySelector('.comments__container')
+    const comment = renderComment(data, user)
+    container.append(comment)
 
-    comment.value = ''
+    comment.querySelector('.upvote-button').addEventListener('click', onUpvote)
+
+    commentInput.value = ''
   })
 }
 

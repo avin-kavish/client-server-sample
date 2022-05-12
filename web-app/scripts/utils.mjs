@@ -1,4 +1,3 @@
-
 export async function fetchJson(url, data, method) {
   const res = await fetch(url, {
     method,
@@ -8,7 +7,7 @@ export async function fetchJson(url, data, method) {
     }
   })
   if (!res.ok) throw new Error('Fetch error')
-  const body  = await res.json()
+  const body = res.status === 204 ? {} : await res.json()
   return body
 }
 
