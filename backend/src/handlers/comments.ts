@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { sampleComments } from "../data"
+import { pick } from "../lib/util"
 
 export function configureComments({ app }: { app: FastifyInstance }) {
   let id = 4
@@ -15,7 +16,12 @@ export function configureComments({ app }: { app: FastifyInstance }) {
   type Request = FastifyRequest<{ Body: { body: string, userId: number } }>
 
   app.post('/api/v1/comments', (request: Request, reply) => {
-    const comment = { id: nextId(), ...request.body, upvotes: 0, createdAt: new Date() }
+    const comment = {
+      id: nextId(),
+      ...request.body,
+      upvotes: 0,
+      createdAt: new Date(),
+    }
 
     sampleComments.push(comment)
 
