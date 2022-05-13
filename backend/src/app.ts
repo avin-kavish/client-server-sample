@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import Fastify, { FastifyRequest } from 'fastify'
 import { configureComments } from "./handlers/comments"
 import { configureUpvotes } from "./handlers/upvotes"
