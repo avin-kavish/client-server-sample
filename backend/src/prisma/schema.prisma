@@ -1,0 +1,31 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  avatar   String
+  comments Comment[]
+  upvotes  Upvote[]
+}
+
+model Comment {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  body         String
+  upvote_count Int
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  upvotes      Upvote[]
+}
+
+model Upvote {
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  commentId Int
+  comment   Comment @relation(fields: [commentId], references: [id])
+
+  @@unique([userId, commentId])
+}
