@@ -1,3 +1,4 @@
+import { Type as T } from "@sinclair/typebox"
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { prisma } from "../prisma/client"
 
@@ -12,7 +13,14 @@ export function configureComments({ app }: { app: FastifyInstance }) {
 
   type Request = FastifyRequest<{ Body: { body: string, userId: number } }>
 
-  app.post('/api/v1/comments', async (request: Request, reply) => {
+  app.post('/api/v1/comments', {
+    schema: {
+      body: T.Object({
+        body: T.String(),
+        userId: T.Number()
+      })
+    }
+  }, async (request: Request, reply) => {
     const { userId, ...rest } = request.body
 
     const comment = await prisma.comment.create({

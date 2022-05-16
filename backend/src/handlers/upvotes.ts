@@ -1,3 +1,4 @@
+import { Type as T } from "@sinclair/typebox"
 import { FastifyInstance, FastifyRequest } from "fastify"
 import { prisma } from "../prisma/client"
 
@@ -5,7 +6,13 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
 
   type GetRequest = FastifyRequest<{ Querystring: { userId: number } }>
 
-  app.get('/api/v1/upvotes', async (request: GetRequest, reply) => {
+  app.get('/api/v1/upvotes', {
+    schema: {
+      querystring: T.Object({
+        userId: T.Number()
+      })
+    }
+  }, async (request: GetRequest, reply) => {
     const { userId } = request.query
 
     reply.send({
@@ -13,21 +20,28 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
     })
   })
 
-  type PostRequest = FastifyRequest<{ Params: { id: string }, Body: { userId: number } }>
+  type PostRequest = FastifyRequest<{ Params: { id: number }, Body: { userId: number } }>
 
-  app.post('/api/v1/comments/:id/upvotes', async (request: PostRequest, reply) => {
+  app.post('/api/v1/comments/:id/upvotes', {
+    schema: {
+      params: T.Object({
+        id: T.Number()
+      }),
+      body: T.Object({
+        userId: T.Number()
+      })
+    }
+  }, async (request: PostRequest, reply) => {
     const { id } = request.params
     const { userId } = request.body
 
     const upvote = {
-      commentId: Number(id),
+      commentId: id,
       userId
     }
 
     await prisma.comment.update({
-      where: {
-        id: upvote.commentId
-      },
+      where: { id },
       data: {
         upvoteCount: {
           increment: 1,
@@ -41,18 +55,25 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
   })
 
   type DeleteRequest = FastifyRequest<{
-    Params: { id: string },
+    Params: { id: number },
     Querystring: { userId: number }
   }>
 
-  app.delete('/api/v1/comments/:id/upvotes', async (request: DeleteRequest, reply) => {
+  app.delete('/api/v1/comments/:id/upvotes', {
+    schema: {
+      params: T.Object({
+        id: T.Number()
+      }),
+      querystring: T.Object({
+        userId: T.Number()
+      })
+    }
+  }, async (request: DeleteRequest, reply) => {
     const { id } = request.params
     const { userId } = request.query
 
     await prisma.comment.update({
-      where: {
-        id: Number(id)
-      },
+      where: { id },
       data: {
         upvoteCount: {
           decrement: 1
