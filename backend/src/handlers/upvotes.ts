@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest } from "fastify"
-import { sampleComments, sampleUpvotes } from "../data"
+import { prisma } from "../prisma/client"
 
 export function configureUpvotes({ app }: { app: FastifyInstance }) {
 
@@ -9,7 +9,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
     const { userId } = request.query
 
     reply.send({
-      data: sampleUpvotes.filter(u => u.userId === Number(userId))
+      data: await prisma.upvote.findMany({ where: { userId: { equals: Number(userId) } } })
     })
   })
 
@@ -24,20 +24,19 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
       userId
     }
 
-    const comment = sampleComments.find(c => c.id === upvote.commentId)
-    if (!comment) {
-      return reply.status(400).send({})
-    }
-
-    if (
-      sampleUpvotes.some(u => upvote.commentId === u.commentId &&
-        upvote.userId === u.userId)
-    ) {
-      return reply.status(200).send({ data: upvote })
-    }
-
-    sampleUpvotes.push(upvote)
-    comment.upvotes++
+    await prisma.comment.update({
+      where: {
+        id: upvote.commentId
+      },
+      data: {
+        upvoteCount: {
+          increment: 1,
+        },
+        upvotes: {
+          create: { userId }
+        },
+      }
+    })
     reply.status(201).send({ data: upvote })
   })
 
@@ -50,16 +49,21 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
     const { id } = request.params
     const { userId } = request.query
 
-    const comment = sampleComments.find(c => c.id === Number(id))
-    if (!comment) {
-      return reply.status(400).send({})
-    }
-
-    const idx = sampleUpvotes.findIndex(u =>
-      u.userId === Number(userId) && u.commentId === Number(id)
-    )
-    sampleUpvotes.splice(idx, 1)
-    comment.upvotes--
+    await prisma.comment.update({
+      where: {
+        id: Number(id)
+      },
+      data: {
+        upvoteCount: {
+          decrement: 1
+        },
+        upvotes: {
+          deleteMany: {
+            userId
+          }
+        },
+      }
+    })
 
     return reply.status(204).send()
   })

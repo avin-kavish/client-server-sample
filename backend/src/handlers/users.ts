@@ -1,40 +1,27 @@
-import { Static, Type as T } from '@sinclair/typebox'
+import { Type as T } from '@sinclair/typebox'
 import { FastifyInstance, FastifyRequest } from "fastify"
+import { coerceArray } from "../lib/util"
+import { prisma } from "../prisma/client"
 
 export function configureUsers({ app }: { app: FastifyInstance }) {
-  const sampleUsers = [
-    {
-      id: 1,
-      name: 'Rob Hope',
-      avatar: 'images/avatar-bob.png'
-    },
-    {
-      id: 2,
-      name: 'Sophie Brecht',
-      avatar: 'images/avatar-sophie.png'
-    },
-    {
-      id: 3,
-      name: 'Cameron Lawrence',
-      avatar: 'images/avatar-cameron.png'
-    },
-  ]
 
   type GetUsersRequest = FastifyRequest<{ Querystring: { ids: number[] } }>
 
   app.get('/api/v1/users', {
     schema: {
       querystring: T.Object({
-        ids: T.Optional(T.Array(T.Number()))
+        ids: T.Optional(T.Union([T.Array(T.Number()), T.Number()]))
       })
     }
   }, async (request: GetUsersRequest, reply) => {
     const { ids = [] } = request.query
 
     return {
-      data: ids.length > 0
-        ? sampleUsers.filter(u => ids.includes(u.id))
-        : sampleUsers
+      data: await (
+        ids.length > 0
+          ? prisma.user.findMany({ where: { id: { in: coerceArray(ids) } } })
+          : prisma.user.findMany()
+      )
     }
   })
 }
