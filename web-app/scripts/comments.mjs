@@ -32,8 +32,8 @@ function renderComment(c, user, upvote) {
           <button class="button button-text upvote-button" data-comment-id="${c.id}">
             ${upvote ? `Upvoted` : `▲ Upvote`}
           </button>
-          <div class="comments__comment-upvotes" data-comment-id="${c.id}" data-upvotes="${c.upvotes}">
-            ${c.upvotes} upvotes
+          <div class="comments__comment-upvotes" data-comment-id="${c.id}" data-upvotes="${c.upvoteCount}">
+            ${c.upvoteCount} upvotes
           </div>
           <!--            <button class="button button-text reply-button">-->
           <!--              Reply-->
