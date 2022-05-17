@@ -7,7 +7,7 @@ export function configureComments({ app }: { app: FastifyInstance }) {
   app.get('/api/v1/comments', async (request, reply) => {
 
     return {
-      data: await prisma.comment.findMany({})
+      data: await prisma.comment.findMany({ orderBy: { createdAt: 'asc' } })
     }
   })
 
