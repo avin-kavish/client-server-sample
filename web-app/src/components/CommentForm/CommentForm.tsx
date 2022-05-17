@@ -1,5 +1,6 @@
 import React, { FormEventHandler } from "react"
 import { fetchJson } from "../../lib/utils"
+import styles from './CommentForm.module.css'
 
 const currentUser = 1
 
@@ -19,8 +20,8 @@ export default function CommentForm({ onAdd }: { onAdd: () => void }) {
   }
 
   return (
-    <form className="comments__form" onSubmit={onSubmit}>
-      <div className="comments__avatar">
+    <form className={styles.form} onSubmit={onSubmit}>
+      <div className={styles.avatar}>
         <img src="/images/avatar-bob.png" />
       </div>
       <input

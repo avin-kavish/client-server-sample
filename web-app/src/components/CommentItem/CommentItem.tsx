@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from "date-fns"
 import React from "react"
 import { Comment, Upvote, User } from "../../lib/types"
+import styles from './CommentItem.module.css'
 
 export interface CommentProps {
   comment: Comment
@@ -12,35 +13,33 @@ export interface CommentProps {
 export default function CommentItem({ comment, upvote, user, onUpvote }: CommentProps) {
 
   return (
-    <div className="comments__comment-container">
+    <div className={styles.container}>
       <div>
-        <div className="comments__avatar">
-          <img className="comments__avatar-img" src={user?.avatar} />
+        <div className={styles.avatar}>
+          <img className={styles.avatarImg} src={user?.avatar} />
         </div>
       </div>
-      <div className="comments__comment-content-container">
-        <div className="comments__comment-header">
-          <div className="comments__comment-author">
+      <div>
+        <div className="d-flex ai-center">
+          <div className={styles.author}>
             {user?.name}
           </div>
-          <div className="comments__comment-header-separator">
-            ・
-          </div>
-          <div className="comments__comment-time">
+          <div className={styles.headerSeparator}> ・</div>
+          <div className={styles.time}>
             {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
           </div>
         </div>
-        <div className="comments__comment-content-body">
+        <div className={styles.contentBody}>
           {comment.body}
         </div>
-        <div className="comments__comment-actions">
+        <div className={styles.actions}>
           <button
-            className="button button-text upvote-button"
+            className={"button button-text " + styles.upvoteButton}
             onClick={() => onUpvote(comment.id)}
           >
             {upvote ? `Upvoted` : `▲ Upvote`}
           </button>
-          <div className="comments__comment-upvotes">
+          <div className={styles.upvotes}>
             {comment.upvoteCount} upvotes
           </div>
           {/*<button className="button button-text reply-button">*/}

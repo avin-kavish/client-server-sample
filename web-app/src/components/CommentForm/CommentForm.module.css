@@ -1,0 +1,15 @@
+
+.form {
+  padding-top: 30px;
+  padding-bottom: 44px;
+  border-bottom: 1px solid #E5E5E5;
+  display: flex;
+  gap: 12px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 42px;
+  overflow: hidden;
+}

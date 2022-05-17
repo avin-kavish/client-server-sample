@@ -4,6 +4,7 @@ import CommentForm from "../../components/CommentForm/CommentForm"
 import CommentItem from "../../components/CommentItem/CommentItem"
 import { Comment, Upvote, User } from "../../lib/types"
 import { fetchJson } from "../../lib/utils"
+import styles from './CommentsPage.module.css'
 
 const currentUser = 1
 
@@ -58,10 +59,10 @@ export default function CommentsPage() {
 
 
   return (
-    <div className="page-container">
-      <h1 className="comments__header-title">Discussion</h1>
+    <div className={styles.pageContainer}>
+      <h1 className={styles.headerTitle}>Discussion</h1>
       <CommentForm onAdd={() => mutateComments()} />
-      <div className="comments__container">
+      <div className={styles.container}>
         {comments?.map(c => {
           const user = users?.find(u => u.id === c.userId)
           const upvote = upvotes?.find(u => u.commentId === c.id)
