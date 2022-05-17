@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React, { FormEventHandler, useMemo } from "react"
 import useSWR from "swr"
 import CommentItem from "../../components/CommentItem/CommentItem"
 import { Comment, Upvote, User } from "../../lib/types"
@@ -39,8 +39,6 @@ export default function CommentsPage() {
         else
           comment.upvoteCount--
 
-        console.log(comment)
-
         return [ ...comments ]
       })
 
@@ -57,10 +55,23 @@ export default function CommentsPage() {
     })
   }
 
+  const onSubmit: FormEventHandler = async (event) => {
+    event.preventDefault()
+
+    const commentInput = (event.target as HTMLFormElement).elements.namedItem('comment') as HTMLInputElement
+
+    const { data } = await fetchJson(`/v1/comments`, {
+      body: commentInput.value,
+      userId: currentUser
+    }, 'POST')
+
+    await mutateComments()
+  }
+
   return (
     <div className="page-container">
       <h1 className="comments__header-title">Discussion</h1>
-      <form className="comments__form">
+      <form className="comments__form" onSubmit={onSubmit}>
         <div className="comments__avatar">
           <img src="/images/avatar-bob.png" />
         </div>
