@@ -1,5 +1,6 @@
-import React, { FormEventHandler, useMemo } from "react"
+import React, { useMemo } from "react"
 import useSWR from "swr"
+import CommentForm from "../../components/CommentForm/CommentForm"
 import CommentItem from "../../components/CommentItem/CommentItem"
 import { Comment, Upvote, User } from "../../lib/types"
 import { fetchJson } from "../../lib/utils"
@@ -55,35 +56,11 @@ export default function CommentsPage() {
     })
   }
 
-  const onSubmit: FormEventHandler = async (event) => {
-    event.preventDefault()
-
-    const commentInput = (event.target as HTMLFormElement).elements.namedItem('comment') as HTMLInputElement
-
-    const { data } = await fetchJson(`/v1/comments`, {
-      body: commentInput.value,
-      userId: currentUser
-    }, 'POST')
-
-    await mutateComments()
-  }
 
   return (
     <div className="page-container">
       <h1 className="comments__header-title">Discussion</h1>
-      <form className="comments__form" onSubmit={onSubmit}>
-        <div className="comments__avatar">
-          <img src="/images/avatar-bob.png" />
-        </div>
-        <input
-          name="comment"
-          className="input-outlined flex-1"
-          placeholder="What are your thoughts?"
-        />
-        <button className="button button-primary">
-          Comment
-        </button>
-      </form>
+      <CommentForm onAdd={() => mutateComments()} />
       <div className="comments__container">
         {comments?.map(c => {
           const user = users?.find(u => u.id === c.userId)
