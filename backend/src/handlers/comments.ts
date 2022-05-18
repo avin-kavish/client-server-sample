@@ -11,17 +11,18 @@ export function configureComments({ app }: { app: FastifyInstance }) {
     }
   })
 
-  type Request = FastifyRequest<{ Body: { body: string, userId: number } }>
+  type Request = FastifyRequest<{ Body: { body: string, parentId: number | undefined, userId: number } }>
 
   app.post('/api/v1/comments', {
     schema: {
       body: T.Object({
         body: T.String(),
-        userId: T.Number()
+        userId: T.Number(),
+        parentId: T.Union([T.Number(), T.Null()])
       })
     }
   }, async (request: Request, reply) => {
-    const { userId, ...rest } = request.body
+    const { userId, parentId, ...rest } = request.body
 
     const comment = await prisma.comment.create({
       data: {
@@ -30,6 +31,11 @@ export function configureComments({ app }: { app: FastifyInstance }) {
         user: {
           connect: {
             id: userId
+          }
+        },
+        parent: {
+          connect: {
+            id: parentId ?? undefined
           }
         }
       }
