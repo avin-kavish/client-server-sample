@@ -1,10 +1,17 @@
 import React, { FormEventHandler } from "react"
-import { fetchJson } from "../../lib/utils"
+import { Comment } from '../../lib/types'
+import { cx, fetchJson } from "../../lib/utils"
 import styles from './CommentForm.module.css'
 
 const currentUser = 1
 
-export default function CommentForm({ onAdd }: { onAdd: () => void }) {
+interface CommentForm {
+  inline?: boolean
+  parentComment?: Comment
+  onAdd?: () => void
+}
+
+export default function CommentForm({ onAdd, parentComment, inline }: CommentForm) {
 
   const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault()
@@ -13,14 +20,16 @@ export default function CommentForm({ onAdd }: { onAdd: () => void }) {
 
     const { data } = await fetchJson(`/v1/comments`, {
       body: commentInput.value,
-      userId: currentUser
+      userId: currentUser,
+      parentId: parentComment?.id
     }, 'POST')
 
-    onAdd()
+    commentInput.value = ''
+    onAdd?.()
   }
 
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
+    <form className={cx(styles.form, inline && styles.formInline)} onSubmit={onSubmit}>
       <div className={styles.avatar}>
         <img src="/images/avatar-bob.png" />
       </div>

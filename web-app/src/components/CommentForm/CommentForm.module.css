@@ -7,6 +7,11 @@
   gap: 12px;
 }
 
+.formInline {
+  padding: 15px 0;
+  border-bottom: none;
+}
+
 .avatar {
   width: 30px;
   height: 30px;

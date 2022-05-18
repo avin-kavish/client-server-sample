@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import useSWR from "swr"
 import CommentForm from "../../components/CommentForm/CommentForm"
 import CommentItem from "../../components/CommentItem/CommentItem"
@@ -24,11 +24,38 @@ export default function CommentsPage() {
 
   const { data: users } = useSWR<User[]>(params ? `/v1/users?${params}` : null)
 
+  const [ showReply, setShowReply ] = useState<Comment | null>(null)
+
+  const tree = useMemo(() => {
+    if (!comments) return []
+
+    return comments
+      .filter(c => !c.parentId)
+      .map(c => {
+        return {
+          ...c,
+          replies: comments?.filter(x => x.parentId === c.id)
+        }
+      })
+  }, [ comments ])
+
   const onUpvote = async (commentId: number) => {
     await mutateUpvotes(async upvotes => {
       if (!upvotes) return
 
       const upvoteIdx = upvotes.findIndex(u => u.commentId === commentId)
+
+      let results
+      if (upvoteIdx === -1) {
+        const newUpvote = { userId: currentUser, commentId }
+        await fetchJson(`/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
+
+        results = [ ...upvotes!, newUpvote ]
+      } else {
+        await fetchJson(`/v1/comments/${commentId}/upvotes?userId=${currentUser}`, undefined, 'DELETE')
+
+        results = upvotes.filter((u, idx) => idx !== upvoteIdx)
+      }
 
       await mutateComments(comments => {
         if (!comments) throw new Error('Logic Error')
@@ -44,36 +71,35 @@ export default function CommentsPage() {
         return [ ...comments ]
       })
 
-      if (upvoteIdx === -1) {
-        const newUpvote = { userId: currentUser, commentId }
-        await fetchJson(`/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
-
-        return [ ...upvotes!, newUpvote ]
-      } else {
-        await fetchJson(`/v1/comments/${commentId}/upvotes?userId=${currentUser}`, undefined, 'DELETE')
-
-        return upvotes.filter((u, idx) => idx !== upvoteIdx)
-      }
+      return results
     })
   }
 
+  const onAdd = () => mutateComments()
+
+  const onReplyAdd = async () => {
+    setShowReply(null)
+    await mutateComments()
+  }
 
   return (
     <div className={styles.pageContainer}>
       <h1 className={styles.headerTitle}>Discussion</h1>
-      <CommentForm onAdd={() => mutateComments()} />
+      <CommentForm onAdd={onAdd} />
       <div className={styles.container}>
-        {comments?.map(c => {
-          const user = users?.find(u => u.id === c.userId)
-          const upvote = upvotes?.find(u => u.commentId === c.id)
+        {tree?.map(c => {
 
           return (
             <CommentItem
               key={c.id}
               comment={c}
-              upvote={upvote}
-              user={user}
+              upvotes={upvotes}
+              users={users}
               onUpvote={onUpvote}
+              replyable={true}
+              showReply={c.id === showReply?.id}
+              onReplyClick={setShowReply}
+              onAdd={onReplyAdd}
             />
           )
         })}

@@ -19,3 +19,4 @@ export const dataFetcher = async (url: string, send: any | undefined, method?: s
   return data
 }
 
+export const cx = (...args: any[]) => args.filter(Boolean).join(' ')

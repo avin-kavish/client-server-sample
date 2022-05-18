@@ -4,6 +4,7 @@ export interface Comment {
   body: string
   upvoteCount: number
   userId: number
+  parentId: number | null
   createdAt: string
 }
 
