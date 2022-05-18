@@ -1,0 +1,19 @@
+{
+  "name": "realtime",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Avin",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon src/server.ts"
+  },
+  "dependencies": {
+    "kafkajs": "^2.0.0",
+    "socket.io": "^4.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16",
+    "typescript": "^4.6.4"
+  }
+}
