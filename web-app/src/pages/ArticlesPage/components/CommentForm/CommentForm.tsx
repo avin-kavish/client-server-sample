@@ -1,6 +1,6 @@
 import React, { FormEventHandler } from "react"
-import { Comment } from '../../lib/types'
-import { cx, fetchJson } from "../../lib/utils"
+import { Comment } from 'lib/types'
+import { cx, fetchJson } from "lib/utils"
 import styles from './CommentForm.module.css'
 
 const currentUser = 1

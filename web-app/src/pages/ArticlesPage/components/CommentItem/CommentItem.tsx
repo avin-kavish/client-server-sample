@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns"
 import React from "react"
-import { Comment, Upvote, User } from "../../lib/types"
+import { Comment, Upvote, User } from "lib/types"
 import CommentForm from "../CommentForm/CommentForm"
 import styles from './CommentItem.module.css'
 
