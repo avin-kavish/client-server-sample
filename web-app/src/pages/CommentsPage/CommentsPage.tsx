@@ -118,17 +118,14 @@ export default function CommentsPage() {
     })
   }
 
-  const onAdd = () => mutateComments()
-
   const onReplyAdd = async () => {
     setShowReply(null)
-    await mutateComments()
   }
 
   return (
     <div className={styles.pageContainer}>
       <h1 className={styles.headerTitle}>Discussion</h1>
-      <CommentForm onAdd={onAdd} />
+      <CommentForm />
       <div className={styles.container}>
         {tree?.map(c => {
 
