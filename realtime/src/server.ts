@@ -1,3 +1,5 @@
-import io from './app'
+import initRealtime from "./app"
 
-io.listen(3011)
+initRealtime()
+  .then(io => io.listen(Number(process.env.PORT) || 3011))
+  .catch(console.error)
