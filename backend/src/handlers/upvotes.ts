@@ -1,5 +1,6 @@
 import { Type as T } from "@sinclair/typebox"
 import { FastifyInstance, FastifyRequest } from "fastify"
+import { producer } from "../lib/kafka"
 import { prisma } from "../prisma/client"
 
 export function configureUpvotes({ app }: { app: FastifyInstance }) {
@@ -40,7 +41,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
       userId
     }
 
-    await prisma.comment.update({
+    const comment = await prisma.comment.update({
       where: { id },
       data: {
         upvoteCount: {
@@ -51,6 +52,24 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
         },
       }
     })
+
+    await producer.sendBatch({
+      topicMessages: [
+        {
+          topic: 'comments.updated',
+          messages: [
+            { key: 'default', value: JSON.stringify(comment) },
+          ]
+        },
+        {
+          topic: 'upvotes.created',
+          messages: [
+            { key: 'default', value: JSON.stringify(upvote) },
+          ]
+        }
+      ]
+    })
+
     reply.status(201).send({ data: upvote })
   })
 
@@ -72,7 +91,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
     const { id } = request.params
     const { userId } = request.query
 
-    await prisma.comment.update({
+    const comment = await prisma.comment.update({
       where: { id },
       data: {
         upvoteCount: {
@@ -84,6 +103,23 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
           }
         },
       }
+    })
+
+    await producer.sendBatch({
+      topicMessages: [
+        {
+          topic: 'comments.updated',
+          messages: [
+            { key: 'default', value: JSON.stringify(comment) },
+          ]
+        },
+        {
+          topic: 'upvotes.deleted',
+          messages: [
+            { key: 'default', value: JSON.stringify({ commentId: comment.id, userId }) },
+          ]
+        }
+      ]
     })
 
     return reply.status(204).send()

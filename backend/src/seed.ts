@@ -10,6 +10,7 @@ import { prisma } from "./prisma/client"
   await prisma.user.createMany({
     data: [
       {
+        id: 1,
         name: 'Rob Hope',
         avatar: 'images/avatar-bob.png'
       },

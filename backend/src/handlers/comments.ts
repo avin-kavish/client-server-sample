@@ -1,5 +1,6 @@
 import { Type as T } from "@sinclair/typebox"
 import { FastifyInstance, FastifyRequest } from "fastify"
+import { producer } from "../lib/kafka"
 import { prisma } from "../prisma/client"
 
 export function configureComments({ app }: { app: FastifyInstance }) {
@@ -18,7 +19,7 @@ export function configureComments({ app }: { app: FastifyInstance }) {
       body: T.Object({
         body: T.String(),
         userId: T.Number(),
-        parentId: T.Union([T.Number(), T.Null()])
+        parentId: T.Optional(T.Union([ T.Number(), T.Null() ]))
       })
     }
   }, async (request: Request, reply) => {
@@ -33,13 +34,21 @@ export function configureComments({ app }: { app: FastifyInstance }) {
             id: userId
           }
         },
-        parent: {
+        parent: parentId ? {
           connect: {
-            id: parentId ?? undefined
+            id: parentId
           }
-        }
+        } : undefined
       }
     })
+
+    await producer.send({
+      topic: 'comments.created',
+      messages: [
+        { key: 'default', value: JSON.stringify(comment) },
+      ]
+    })
+
     reply.status(201).send({ data: comment })
   })
 }

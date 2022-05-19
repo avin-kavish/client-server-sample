@@ -690,6 +690,11 @@ json-schema-traverse@^1.0.0:
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
   integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
 
+kafkajs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/kafkajs/-/kafkajs-2.0.0.tgz#04f468bacc4ccb850529e2293886db6b7c41c08a"
+  integrity sha512-NdDhoEJcCBx7XTqXDbolkk5UJ4Rt4XefZ1SdP2NmFF5J39+WRh1gLdqhcQfnP8bn6sw08llfjyrg2bOhONBzZQ==
+
 keyv@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/keyv/-/keyv-3.1.0.tgz#ecc228486f69991e49e9476485a5be1e8fc5c4d9"
