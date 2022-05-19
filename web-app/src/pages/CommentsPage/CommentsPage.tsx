@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
+import { io } from "socket.io-client"
 import useSWR from "swr"
 import CommentForm from "../../components/CommentForm/CommentForm"
 import CommentItem from "../../components/CommentItem/CommentItem"
@@ -9,22 +10,78 @@ import styles from './CommentsPage.module.css'
 const currentUser = 1
 
 export default function CommentsPage() {
-  const { data: comments, mutate: mutateComments } = useSWR<Comment[]>('/v1/comments')
+  const {
+    data: comments,
+    mutate: mutateComments
+  } = useSWR<Comment[]>('/v1/comments', { revalidateOnFocus: false })
   const {
     data: upvotes,
     mutate: mutateUpvotes
-  } = useSWR<Upvote[]>(`/v1/upvotes?userId=${currentUser}`)
+  } = useSWR<Upvote[]>(`/v1/upvotes?userId=${currentUser}`, { revalidateOnFocus: false })
 
   const params = useMemo(() => comments
     ? new URLSearchParams([
-      ...comments.map(c => [ 'ids', String(c.userId) ]),
-      [ 'ids', String(currentUser) ]
+      ...Array.from(
+        new Set([
+          ...comments.map(c => c.userId),
+          currentUser
+        ])
+      ).map(id => [ 'ids', String(id) ]),
     ])
     : null, [ comments ])
 
   const { data: users } = useSWR<User[]>(params ? `/v1/users?${params}` : null)
 
   const [ showReply, setShowReply ] = useState<Comment | null>(null)
+
+  useEffect(() => {
+    const socket = io('ws://localhost:3011')
+
+    socket.on('connect', () => {
+      socket.emit('subscribe', 'comments:*')
+      socket.emit('subscribe', 'upvotes:*')
+    })
+
+    socket.on('comments:*', payload => {
+      switch (payload.type) {
+        case 'created':
+          mutateComments(c => [ ...c!, payload.data ])
+          break
+        case 'updated':
+          mutateComments(comments => {
+            const idx = comments!.findIndex(c => c.id === payload.data.id)
+            if (idx === -1) {
+              return [ ...comments!, payload.data ]
+            } else {
+              comments![idx] = payload.data
+              return [ ...comments! ]
+            }
+          })
+          break
+        case 'deleted':
+          mutateComments(c => c!.filter(c => c.id !== payload.data.id))
+          break
+      }
+    })
+    socket.on('upvotes:*', payload => {
+      const upvote: Upvote = payload.data
+      switch (payload.type) {
+        case 'created':
+          mutateUpvotes(u => [ ...u!, upvote ])
+          break
+        case 'deleted':
+          mutateUpvotes(u =>
+            u!.filter(u => !(
+              u.commentId === upvote.commentId &&
+              u.userId === upvote.userId
+            ))
+          )
+          break
+      }
+    })
+
+    return () => void socket.disconnect()
+  }, [])
 
   const tree = useMemo(() => {
     if (!comments) return []
@@ -56,20 +113,6 @@ export default function CommentsPage() {
 
         results = upvotes.filter((u, idx) => idx !== upvoteIdx)
       }
-
-      await mutateComments(comments => {
-        if (!comments) throw new Error('Logic Error')
-
-        const comment = comments!.find(c => c.id === commentId)
-        if (!comment) throw new Error('Logic Error')
-
-        if (upvoteIdx === -1)
-          comment.upvoteCount++
-        else
-          comment.upvoteCount--
-
-        return [ ...comments ]
-      })
 
       return results
     })
