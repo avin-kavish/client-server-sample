@@ -5,11 +5,11 @@ import CommentForm from "../../components/CommentForm/CommentForm"
 import CommentItem from "../../components/CommentItem/CommentItem"
 import { Comment, Upvote, User } from "../../lib/types"
 import { fetchJson } from "../../lib/utils"
-import styles from './CommentsPage.module.css'
+import styles from './ArticlesPage.module.css'
 
 const currentUser = 1
 
-export default function CommentsPage() {
+export default function ArticlesPage() {
   const {
     data: comments,
     mutate: mutateComments
