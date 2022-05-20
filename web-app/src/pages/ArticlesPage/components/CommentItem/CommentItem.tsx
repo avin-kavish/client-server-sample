@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns"
-import React from "react"
 import { Comment, Upvote, User } from "lib/types"
+import React from "react"
 import CommentForm from "../CommentForm/CommentForm"
 import styles from './CommentItem.module.css'
 
@@ -13,9 +13,11 @@ export interface CommentProps {
   onReplyClick: (comment: Comment | null) => void
   onAdd: () => void
   replyable?: boolean
+  articleId: number
 }
 
 export default function CommentItem({
+                                      articleId,
                                       comment,
                                       upvotes,
                                       users,
@@ -70,6 +72,7 @@ export default function CommentItem({
         <div className={styles.replies}>
           {comment.replies?.map(c => (
             <CommentItem
+              articleId={articleId}
               comment={c}
               users={users}
               upvotes={upvotes}
@@ -80,7 +83,14 @@ export default function CommentItem({
             />
           ))}
         </div>
-        {showReply && <CommentForm inline parentComment={comment} onAdd={onAdd} />}
+        {showReply && (
+          <CommentForm
+            articleId={articleId}
+            inline
+            parentComment={comment}
+            onAdd={onAdd}
+          />
+        )}
       </div>
     </div>
   )

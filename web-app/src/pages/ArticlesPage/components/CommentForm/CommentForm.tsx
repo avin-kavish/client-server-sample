@@ -6,12 +6,13 @@ import styles from './CommentForm.module.css'
 const currentUser = 1
 
 interface CommentForm {
+  articleId: number
   inline?: boolean
   parentComment?: Comment
   onAdd?: () => void
 }
 
-export default function CommentForm({ onAdd, parentComment, inline }: CommentForm) {
+export default function CommentForm({ onAdd, parentComment, articleId, inline }: CommentForm) {
 
   const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault()
@@ -21,7 +22,8 @@ export default function CommentForm({ onAdd, parentComment, inline }: CommentFor
     const { data } = await fetchJson(`/v1/comments`, {
       body: commentInput.value,
       userId: currentUser,
-      parentId: parentComment?.id
+      parentId: parentComment?.id,
+      articleId
     }, 'POST')
 
     commentInput.value = ''

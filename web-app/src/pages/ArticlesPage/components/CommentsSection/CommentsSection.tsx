@@ -1,24 +1,31 @@
+import { REALTIME_URL } from "lib/constants"
+import { Comment, Upvote, User } from "lib/types"
+import { fetchJson } from "lib/utils"
 import React, { useEffect, useMemo, useState } from "react"
 import { io } from "socket.io-client"
 import useSWR from "swr"
-import { REALTIME_URL } from "../../../../lib/constants"
-import { Comment, Upvote, User } from "../../../../lib/types"
-import { fetchJson } from "../../../../lib/utils"
-import styles from "./CommentsSection.module.css"
 import CommentForm from "../CommentForm/CommentForm"
 import CommentItem from "../CommentItem/CommentItem"
+import styles from "./CommentsSection.module.css"
 
 const currentUserId = 1
 
-export default function CommentsSection() {
+interface CommentsSectionProps {
+  articleId: number
+}
+
+export default function CommentsSection({ articleId }: CommentsSectionProps) {
   const {
     data: comments,
     mutate: mutateComments
-  } = useSWR<Comment[]>('/v1/comments', { revalidateOnFocus: false })
+  } = useSWR<Comment[]>(`/v1/comments?articleId=${articleId}`, { revalidateOnFocus: false })
   const {
     data: upvotes,
     mutate: mutateUpvotes
-  } = useSWR<Upvote[]>(`/v1/upvotes?userId=${currentUserId}`, { revalidateOnFocus: false })
+  } = useSWR<Upvote[]>(
+    `/v1/upvotes?userId=${currentUserId}&articleId=${articleId}`,
+    { revalidateOnFocus: false }
+  )
 
   const params = useMemo(() => comments
     ? new URLSearchParams([
@@ -39,14 +46,14 @@ export default function CommentsSection() {
     const socket = io(REALTIME_URL)
 
     socket.on('connect', () => {
-      socket.emit('subscribe', 'comments:*')
-      socket.emit('subscribe', 'upvotes:*')
+      socket.emit('subscribe', { event: 'comments:*', filter: { articleId } })
+      socket.emit('subscribe', { event: 'upvotes:*', filter: { articleId } })
     })
 
     socket.on('comments:*', payload => {
       switch (payload.type) {
         case 'created':
-          mutateComments(c => [ ...c!, payload.data ])
+          mutateComments(c => [ ...c!, payload.data ], { revalidate: false })
           break
         case 'updated':
           mutateComments(comments => {
@@ -57,10 +64,10 @@ export default function CommentsSection() {
               comments![idx] = payload.data
               return [ ...comments! ]
             }
-          })
+          }, { revalidate: false })
           break
         case 'deleted':
-          mutateComments(c => c!.filter(c => c.id !== payload.data.id))
+          mutateComments(c => c!.filter(c => c.id !== payload.data.id), { revalidate: false })
           break
       }
     })
@@ -68,14 +75,15 @@ export default function CommentsSection() {
       const upvote: Upvote = payload.data
       switch (payload.type) {
         case 'created':
-          mutateUpvotes(u => [ ...u!, upvote ])
+          mutateUpvotes(u => [ ...u!, upvote ], { revalidate: false })
           break
         case 'deleted':
           mutateUpvotes(u =>
-            u!.filter(u => !(
-              u.commentId === upvote.commentId &&
-              u.userId === upvote.userId
-            ))
+              u!.filter(u => !(
+                u.commentId === upvote.commentId &&
+                u.userId === upvote.userId
+              )),
+            { revalidate: false }
           )
           break
       }
@@ -103,20 +111,17 @@ export default function CommentsSection() {
 
       const upvoteIdx = upvotes.findIndex(u => u.commentId === commentId)
 
-      let results
       if (upvoteIdx === -1) {
-        const newUpvote = { userId: currentUserId, commentId }
+        const newUpvote = { userId: currentUserId, commentId, articleId }
         await fetchJson(`/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
 
-        results = [ ...upvotes!, newUpvote ]
+        return [ ...upvotes!, newUpvote ]
       } else {
         await fetchJson(`/v1/comments/${commentId}/upvotes?userId=${currentUserId}`, undefined, 'DELETE')
 
-        results = upvotes.filter((u, idx) => idx !== upvoteIdx)
+        return upvotes.filter((u, idx) => idx !== upvoteIdx)
       }
-
-      return results
-    })
+    }, { revalidate: false })
   }
 
   const onReplyAdd = async () => {
@@ -126,12 +131,13 @@ export default function CommentsSection() {
   return (
     <>
       <h1 className={styles.headerTitle}>Discussion</h1>
-      <CommentForm />
+      <CommentForm articleId={articleId} />
       <div className={styles.container}>
         {tree?.map(c => {
 
           return (
             <CommentItem
+              articleId={articleId}
               key={c.id}
               comment={c}
               upvotes={upvotes}
