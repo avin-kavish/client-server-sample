@@ -74,6 +74,7 @@ export default function CommentItem({
         <div className={styles.replies}>
           {comment.replies?.map(c => (
             <CommentItem
+              key={c.id}
               currentUser={currentUser}
               articleId={articleId}
               comment={c}

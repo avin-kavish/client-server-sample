@@ -139,9 +139,9 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
 
           return (
             <CommentItem
+              key={c.id}
               currentUser={currentUser}
               articleId={articleId}
-              key={c.id}
               comment={c}
               upvotes={upvotes}
               users={users}
