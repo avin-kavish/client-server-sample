@@ -5,19 +5,25 @@ import { prisma } from "../prisma/client"
 
 export function configureUpvotes({ app }: { app: FastifyInstance }) {
 
-  type GetRequest = FastifyRequest<{ Querystring: { userId: number } }>
+  type GetRequest = FastifyRequest<{ Querystring: { userId: number, articleId: number } }>
 
   app.get('/api/v1/upvotes', {
     schema: {
       querystring: T.Object({
+        articleId: T.Number(),
         userId: T.Number()
       })
     }
   }, async (request: GetRequest, reply) => {
-    const { userId } = request.query
+    const { userId, articleId } = request.query
 
     reply.send({
-      data: await prisma.upvote.findMany({ where: { userId: { equals: Number(userId) } } })
+      data: await prisma.upvote.findMany({
+        where: {
+          userId: { equals: userId },
+          articleId: { equals: articleId }
+        }
+      })
     })
   })
 
@@ -36,8 +42,14 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
     const { id } = request.params
     const { userId } = request.body
 
+    const dbComment = await prisma.comment.findUnique({ where: { id } })
+    if (!dbComment) {
+      return reply.status(400).send({})
+    }
+
     const upvote = {
       commentId: id,
+      articleId: dbComment.articleId,
       userId
     }
 
@@ -48,7 +60,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
           increment: 1,
         },
         upvotes: {
-          create: { userId }
+          create: { userId, articleId: dbComment.articleId }
         },
       }
     })
@@ -116,7 +128,14 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
         {
           topic: 'upvotes.deleted',
           messages: [
-            { key: 'default', value: JSON.stringify({ commentId: comment.id, userId }) },
+            {
+              key: 'default',
+              value: JSON.stringify({
+                commentId: comment.id,
+                userId,
+                articleId: comment.articleId
+              })
+            },
           ]
         }
       ]

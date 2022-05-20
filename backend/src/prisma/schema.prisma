@@ -22,6 +22,7 @@ model Comment {
   parentId    Int?
   parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies     Comment[] @relation("CommentReplies")
+  articleId  Int
 }
 
 model Upvote {
@@ -29,6 +30,7 @@ model Upvote {
   user      User    @relation(fields: [userId], references: [id])
   commentId Int
   comment   Comment @relation(fields: [commentId], references: [id])
+  articleId  Int
 
   @@unique([userId, commentId])
 }

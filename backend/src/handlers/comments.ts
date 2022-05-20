@@ -12,11 +12,19 @@ export function configureComments({ app }: { app: FastifyInstance }) {
     }
   })
 
-  type Request = FastifyRequest<{ Body: { body: string, parentId: number | undefined, userId: number } }>
+  type Request = FastifyRequest<{
+    Body: {
+      articleId: number
+      body: string,
+      parentId: number | undefined,
+      userId: number
+    }
+  }>
 
   app.post('/api/v1/comments', {
     schema: {
       body: T.Object({
+        articleId: T.Number(),
         body: T.String(),
         userId: T.Number(),
         parentId: T.Optional(T.Union([ T.Number(), T.Null() ]))
