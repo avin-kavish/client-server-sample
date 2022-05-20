@@ -105,6 +105,8 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
       })
   }, [ comments ])
 
+  const currentUser = users?.find(u => u.id === currentUserId)
+
   const onUpvote = async (commentId: number) => {
     await mutateUpvotes(async upvotes => {
       if (!upvotes) return
@@ -131,12 +133,13 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
   return (
     <>
       <h1 className={styles.headerTitle}>Discussion</h1>
-      <CommentForm articleId={articleId} />
+      <CommentForm currentUser={currentUser} articleId={articleId} />
       <div className={styles.container}>
         {tree?.map(c => {
 
           return (
             <CommentItem
+              currentUser={currentUser}
               articleId={articleId}
               key={c.id}
               comment={c}

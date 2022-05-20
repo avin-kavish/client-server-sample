@@ -14,9 +14,11 @@ export interface CommentProps {
   onAdd: () => void
   replyable?: boolean
   articleId: number
+  currentUser: User | undefined
 }
 
 export default function CommentItem({
+                                      currentUser,
                                       articleId,
                                       comment,
                                       upvotes,
@@ -72,6 +74,7 @@ export default function CommentItem({
         <div className={styles.replies}>
           {comment.replies?.map(c => (
             <CommentItem
+              currentUser={currentUser}
               articleId={articleId}
               comment={c}
               users={users}
@@ -85,6 +88,7 @@ export default function CommentItem({
         </div>
         {showReply && (
           <CommentForm
+            currentUser={currentUser}
             articleId={articleId}
             inline
             parentComment={comment}
