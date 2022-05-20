@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { io } from "socket.io-client"
 import useSWR from "swr"
+import { REALTIME_URL } from "../../../../lib/constants"
 import { Comment, Upvote, User } from "../../../../lib/types"
 import { fetchJson } from "../../../../lib/utils"
-import styles from "../../ArticlesPage.module.css"
+import styles from "./CommentsSection.module.css"
 import CommentForm from "../CommentForm/CommentForm"
 import CommentItem from "../CommentItem/CommentItem"
 
-const currentUser = 1
+const currentUserId = 1
 
 export default function CommentsSection() {
   const {
@@ -17,14 +18,14 @@ export default function CommentsSection() {
   const {
     data: upvotes,
     mutate: mutateUpvotes
-  } = useSWR<Upvote[]>(`/v1/upvotes?userId=${currentUser}`, { revalidateOnFocus: false })
+  } = useSWR<Upvote[]>(`/v1/upvotes?userId=${currentUserId}`, { revalidateOnFocus: false })
 
   const params = useMemo(() => comments
     ? new URLSearchParams([
       ...Array.from(
         new Set([
           ...comments.map(c => c.userId),
-          currentUser
+          currentUserId
         ])
       ).map(id => [ 'ids', String(id) ]),
     ])
@@ -35,7 +36,7 @@ export default function CommentsSection() {
   const [ showReply, setShowReply ] = useState<Comment | null>(null)
 
   useEffect(() => {
-    const socket = io('ws://localhost:3011')
+    const socket = io(REALTIME_URL)
 
     socket.on('connect', () => {
       socket.emit('subscribe', 'comments:*')
@@ -104,12 +105,12 @@ export default function CommentsSection() {
 
       let results
       if (upvoteIdx === -1) {
-        const newUpvote = { userId: currentUser, commentId }
+        const newUpvote = { userId: currentUserId, commentId }
         await fetchJson(`/v1/comments/${commentId}/upvotes`, newUpvote, 'POST')
 
         results = [ ...upvotes!, newUpvote ]
       } else {
-        await fetchJson(`/v1/comments/${commentId}/upvotes?userId=${currentUser}`, undefined, 'DELETE')
+        await fetchJson(`/v1/comments/${commentId}/upvotes?userId=${currentUserId}`, undefined, 'DELETE')
 
         results = upvotes.filter((u, idx) => idx !== upvoteIdx)
       }

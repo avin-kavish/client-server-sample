@@ -4,14 +4,3 @@
   max-width: 800px;
   padding: 38px 50px;
 }
-
-.container {
-  margin-top: 42px;
-  display: flex;
-  flex-direction: column;
-  gap: 35px;
-}
-
-.headerTitle {
-  font-size: 18px;
-}
