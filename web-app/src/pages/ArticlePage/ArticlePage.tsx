@@ -1,10 +1,10 @@
 import React from "react"
-import styles from './ArticlesPage.module.css'
+import styles from './ArticlePage.module.css'
 import { CommentsSection } from "./components"
 
 const articleId = 1
 
-export default function ArticlesPage() {
+export default function ArticlePage() {
 
 
   return (

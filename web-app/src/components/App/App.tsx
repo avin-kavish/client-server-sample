@@ -1,13 +1,13 @@
 import React from 'react'
 import { SWRConfig } from 'swr'
 import { dataFetcher } from "../../lib/utils"
-import ArticlesPage from "../../pages/ArticlesPage"
+import ArticlePage from "../../pages/ArticlePage"
 
 function App() {
 
   return (
     <SWRConfig value={{ fetcher: dataFetcher }}>
-      <ArticlesPage />
+      <ArticlePage />
     </SWRConfig>
   )
 }
