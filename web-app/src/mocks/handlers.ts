@@ -14,12 +14,12 @@ type CreateUpvoteDTO = { userId: number }
 export const handlers = [
   rest.get(`${BASE_URL}/v1/users`, (req, res, ctx) => {
     return res(
-      ctx.json(mockDb.user.findMany({}))
+      ctx.json({ data: mockDb.user.findMany({}) })
     )
   }),
   rest.get(`${BASE_URL}/v1/comments`, (req, res, ctx) => {
     return res(
-      ctx.json(mockDb.comment.findMany({}))
+      ctx.json({ data: mockDb.comment.findMany({}) })
     )
   }),
   rest.post(`${BASE_URL}/v1/comments`, (req: RestRequest<CreateCommentDTO>, res, ctx) => {
@@ -34,7 +34,7 @@ export const handlers = [
   }),
   rest.get(`${BASE_URL}/v1/upvotes`, (req, res, ctx) => {
     return res(
-      ctx.json(mockDb.upvote.findMany({}))
+      ctx.json({ data: mockDb.upvote.findMany({}) })
     )
   }),
   rest.post(`${BASE_URL}/api/v1/comments/:id/upvotes`, (req: RestRequest<CreateUpvoteDTO>, res, ctx) => {
@@ -99,5 +99,5 @@ export const handlers = [
     return res(
       ctx.status(204),
     )
-  })
+  }),
 ]

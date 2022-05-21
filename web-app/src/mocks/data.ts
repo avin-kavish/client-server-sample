@@ -17,6 +17,7 @@ const db = factory({
     articleId: Number
   },
   upvote: {
+    id: primaryKey(Number),
     userId: Number,
     commentId: Number,
     articleId: Number
@@ -71,6 +72,7 @@ const sampleComments = [
 
 const sampleUpvotes = [
   {
+    id: 1,
     articleId: 1,
     commentId: 1,
     userId: 1,
@@ -81,7 +83,7 @@ export async function seed() {
   drop(db)
   sampleUsers.forEach(u => db.user.create(u))
   sampleComments.forEach(c => db.comment.create(c))
-  sampleUpvotes.forEach(u  => db.upvote.create(u))
+  sampleUpvotes.forEach(u => db.upvote.create(u))
 }
 
 export { db as mockDb }
