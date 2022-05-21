@@ -9,10 +9,15 @@ async function initRealtime() {
     }
   })
 
+  const filterMap = new Map<string, object>()
+
   io.on("connection", (socket) => {
 
     socket.on("subscribe", (eventSpec, cb) => {
-      const [ model, action ] = eventSpec.split(':')
+      const [ model, action ] = eventSpec.event.split(':')
+
+      if (eventSpec.filter)
+        filterMap.set(socket.id, eventSpec.filter)
 
       console.log(`Subscribing: ${socket.id} to ${model}:${action}`)
       socket.join(`${model}:${action}`)
