@@ -1,25 +1,29 @@
 import { createComment, getComments } from "../../../src/handlers/comments"
-import { prismaMock, producerMock, mockReply, getReply } from "../../singleton"
-
+import { mockReply, prismaMock, producerMock } from "../../singleton"
 
 describe('Comments Handlers', () => {
   describe('get comments', () => {
 
     test('finds many records in the database', async () => {
       await getComments(
-        {} as any,
+        { query: { articleId: 1 } } as any,
         {} as any
       )
 
       expect(prismaMock.comment.findMany)
-        .toHaveBeenCalledWith({ orderBy: { createdAt: 'asc' } })
+        .toHaveBeenCalledWith({
+          where: {
+            articleId: { equals: 1 },
+          },
+          orderBy: { createdAt: 'asc' }
+        })
     })
 
     test('returns correct value', async () => {
       prismaMock.comment.findMany.mockResolvedValueOnce([])
 
       const result = await getComments(
-        {} as any,
+        { query: { articleId: 1 } } as any,
         {} as any
       )
 
@@ -34,7 +38,7 @@ describe('Comments Handlers', () => {
 
       await createComment(
         { body } as any,
-        mockReply.reply  as any
+        mockReply.reply as any
       )
 
       expect(prismaMock.comment.create).toHaveBeenCalledWith({

@@ -5,7 +5,11 @@ import { prisma } from "../prisma/client"
 
 export function configureComments({ app }: { app: FastifyInstance }) {
 
-  app.get('/api/v1/comments', getComments)
+  app.get('/api/v1/comments', {
+    schema: {
+      body: T.Object({ articleId: T.Number() })
+    }
+  }, getComments)
 
   app.post('/api/v1/comments', {
     schema: {
@@ -19,10 +23,18 @@ export function configureComments({ app }: { app: FastifyInstance }) {
   }, createComment)
 }
 
-export async function getComments(request: FastifyRequest, reply: FastifyReply) {
+type GetRequest = FastifyRequest<{ Querystring: { articleId: number } }>
+
+export async function getComments(request: GetRequest, reply: FastifyReply) {
+  const { articleId } = request.query
 
   return {
-    data: await prisma.comment.findMany({ orderBy: { createdAt: 'asc' } })
+    data: await prisma.comment.findMany({
+      where: {
+        articleId: { equals: articleId },
+      },
+      orderBy: { createdAt: 'asc' }
+    })
   }
 }
 
