@@ -1,5 +1,5 @@
 import { Type as T } from '@sinclair/typebox'
-import { FastifyInstance, FastifyRequest } from "fastify"
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { coerceArray } from "../lib/util"
 import { prisma } from "../prisma/client"
 
@@ -16,7 +16,7 @@ export function configureUsers({ app }: { app: FastifyInstance }) {
 
 type GetUsersRequest = FastifyRequest<{ Querystring: { ids: number[] } }>
 
-export async function getUsers(request: GetUsersRequest, reply) {
+export async function getUsers(request: GetUsersRequest, reply: FastifyReply) {
   const { ids = [] } = request.query
 
   return {

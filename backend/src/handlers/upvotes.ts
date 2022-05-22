@@ -1,5 +1,5 @@
 import { Type as T } from "@sinclair/typebox"
-import { FastifyInstance, FastifyRequest } from "fastify"
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { producer } from "../lib/kafka"
 import { prisma } from "../prisma/client"
 
@@ -40,7 +40,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
 
 type GetRequest = FastifyRequest<{ Querystring: { userId: number, articleId: number } }>
 
-export async function getUpvotes(request: GetRequest, reply) {
+export async function getUpvotes(request: GetRequest, reply: FastifyReply) {
   const { userId, articleId } = request.query
 
   reply.send({
@@ -55,7 +55,7 @@ export async function getUpvotes(request: GetRequest, reply) {
 
 type PostRequest = FastifyRequest<{ Params: { id: number }, Body: { userId: number } }>
 
-export async function createUpvote(request: PostRequest, reply) {
+export async function createUpvote(request: PostRequest, reply: FastifyReply) {
   const { id } = request.params
   const { userId } = request.body
 
@@ -108,7 +108,7 @@ type  DeleteRequest = FastifyRequest<{
   Querystring: { userId: number }
 }>
 
-export async function deleteRequest(request: DeleteRequest, reply) {
+export async function deleteRequest(request: DeleteRequest, reply: FastifyReply) {
   const { id } = request.params
   const { userId } = request.query
 

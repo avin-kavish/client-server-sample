@@ -35,7 +35,7 @@ type CreateRequest = FastifyRequest<{
   }
 }>
 
-export async function createComment(request: CreateRequest, reply) {
+export async function createComment(request: CreateRequest, reply: FastifyReply) {
   const { userId, parentId, ...rest } = request.body
 
   const comment = await prisma.comment.create({
