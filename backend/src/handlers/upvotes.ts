@@ -34,7 +34,7 @@ export function configureUpvotes({ app }: { app: FastifyInstance }) {
         userId: T.Number()
       })
     }
-  }, deleteRequest)
+  }, deleteUpvote)
 }
 
 
@@ -108,7 +108,7 @@ type DeleteRequest = FastifyRequest<{
   Querystring: { userId: number }
 }>
 
-export async function deleteRequest(request: DeleteRequest, reply: FastifyReply) {
+export async function deleteUpvote(request: DeleteRequest, reply: FastifyReply) {
   const { id } = request.params
   const { userId } = request.query
 
