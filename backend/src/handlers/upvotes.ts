@@ -43,14 +43,14 @@ type GetRequest = FastifyRequest<{ Querystring: { userId: number, articleId: num
 export async function getUpvotes(request: GetRequest, reply: FastifyReply) {
   const { userId, articleId } = request.query
 
-  reply.send({
+  return {
     data: await prisma.upvote.findMany({
       where: {
         userId: { equals: userId },
         articleId: { equals: articleId }
       }
     })
-  })
+  }
 }
 
 type PostRequest = FastifyRequest<{ Params: { id: number }, Body: { userId: number } }>
@@ -103,7 +103,7 @@ export async function createUpvote(request: PostRequest, reply: FastifyReply) {
 }
 
 
-type  DeleteRequest = FastifyRequest<{
+type DeleteRequest = FastifyRequest<{
   Params: { id: number },
   Querystring: { userId: number }
 }>
