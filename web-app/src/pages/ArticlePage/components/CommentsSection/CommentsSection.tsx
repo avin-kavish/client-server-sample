@@ -71,6 +71,8 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
           break
       }
     })
+    // console.debug('registered comments:* event handler')
+
     socket.on('upvotes:*', payload => {
       const upvote: Upvote = payload.data
       switch (payload.type) {
@@ -88,8 +90,13 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
           break
       }
     })
+    // console.debug('registered upvotes:* event handler')
 
-    return () => void socket.disconnect()
+    return () => {
+      socket.removeAllListeners()
+      socket.disconnect()
+      // console.debug('removed all event handlers')
+    }
   }, [])
 
   const tree = useMemo(() => {
@@ -134,7 +141,7 @@ export default function CommentsSection({ articleId }: CommentsSectionProps) {
     <>
       <h1 className={styles.headerTitle}>Discussion</h1>
       <CommentForm currentUser={currentUser} articleId={articleId} />
-      <div className={styles.container}>
+      <div data-testid="comment-list-container" className={styles.container}>
         {tree?.map(c => {
 
           return (

@@ -1,6 +1,7 @@
 import { rest, RestRequest } from 'msw'
 import { BASE_URL } from "../lib/constants"
 import { mockDb } from "./data"
+import { mockSocket } from "./socket"
 
 type CreateCommentDTO = {
   articleId: number
@@ -10,6 +11,7 @@ type CreateCommentDTO = {
 }
 
 type CreateUpvoteDTO = { userId: number }
+
 
 export const handlers = [
   rest.get(`${BASE_URL}/v1/users`, (req, res, ctx) => {
@@ -24,12 +26,12 @@ export const handlers = [
   }),
   rest.post(`${BASE_URL}/v1/comments`, (req: RestRequest<CreateCommentDTO>, res, ctx) => {
     const data = req.body
-    const comment = mockDb.comment.create(data)
+    const comment = mockDb.comment.create({ ...data })
+
+    mockSocket.server.emit('comments:*', { type: 'created', data: comment })
 
     return res(
-      ctx.json({
-        data: comment
-      })
+      ctx.json({ data: comment })
     )
   }),
   rest.get(`${BASE_URL}/v1/upvotes`, (req, res, ctx) => {
@@ -37,7 +39,7 @@ export const handlers = [
       ctx.json({ data: mockDb.upvote.findMany({}) })
     )
   }),
-  rest.post(`${BASE_URL}/api/v1/comments/:id/upvotes`, (req: RestRequest<CreateUpvoteDTO>, res, ctx) => {
+  rest.post(`${BASE_URL}/v1/comments/:id/upvotes`, (req: RestRequest<CreateUpvoteDTO>, res, ctx) => {
     const id = Number(req.params.id)
     const userId = req.body.userId
 
@@ -48,7 +50,7 @@ export const handlers = [
       )
     }
 
-    mockDb.comment.update({
+    const data = mockDb.comment.update({
       where: {
         id: { equals: id }
       },
@@ -57,11 +59,15 @@ export const handlers = [
       }
     })
 
+    mockSocket.server.emit('comments:*', { type: 'updated', data })
+
     const upvote = mockDb.upvote.create({
       commentId: id,
       articleId: dbComment.articleId,
       userId
     })
+
+    mockSocket.server.emit('upvotes:*', { type: 'created', data: upvote })
 
     return res(
       ctx.json({
@@ -69,7 +75,7 @@ export const handlers = [
       })
     )
   }),
-  rest.delete(`${BASE_URL}/api/v1/comments/:id/upvotes`, (req, res, ctx) => {
+  rest.delete(`${BASE_URL}/v1/comments/:id/upvotes`, (req, res, ctx) => {
     const id = Number(req.params.id)
     const userId = Number(req.url.searchParams.get('userId'))
 
@@ -87,7 +93,7 @@ export const handlers = [
       }
     })
     if (upvote) {
-      mockDb.comment.update({
+      const data = mockDb.comment.update({
         where: {
           id: { equals: id }
         },
@@ -95,6 +101,10 @@ export const handlers = [
           upvoteCount: (prevValue, entity) => prevValue - 1
         }
       })
+
+      mockSocket.server.emit('comments:*', { type: 'updated', data })
+
+      mockSocket.server.emit('upvotes:*', { type: 'deleted', data: upvote })
     }
     return res(
       ctx.status(204),

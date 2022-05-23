@@ -1,6 +1,6 @@
-import React, { FormEventHandler } from "react"
 import { Comment, User } from 'lib/types'
 import { cx, fetchJson } from "lib/utils"
+import React, { FormEventHandler } from "react"
 import styles from './CommentForm.module.css'
 
 interface CommentForm {
@@ -11,7 +11,13 @@ interface CommentForm {
   currentUser: User | undefined
 }
 
-export default function CommentForm({ onAdd, parentComment, currentUser, articleId, inline }: CommentForm) {
+export default function CommentForm({
+                                      onAdd,
+                                      parentComment,
+                                      currentUser,
+                                      articleId,
+                                      inline
+                                    }: CommentForm) {
 
   const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault()
@@ -30,9 +36,13 @@ export default function CommentForm({ onAdd, parentComment, currentUser, article
   }
 
   return (
-    <form className={cx(styles.form, inline && styles.formInline)} onSubmit={onSubmit}>
+    <form
+      data-testid="comment-form"
+      className={cx(styles.form, inline && styles.formInline)}
+      onSubmit={onSubmit}
+    >
       <div className={styles.avatar}>
-        <img src={currentUser?.avatar} />
+        <img alt="Avatar of user" src={currentUser?.avatar} />
       </div>
       <input
         name="comment"

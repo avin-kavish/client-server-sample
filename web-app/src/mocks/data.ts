@@ -1,5 +1,9 @@
-import { drop, factory, primaryKey } from '@mswjs/data'
+import { drop, factory, nullable, primaryKey } from '@mswjs/data'
 import { subDays, subMinutes, subWeeks } from "date-fns"
+
+let commentId = 4
+
+let upvoteId = 2
 
 const db = factory({
   user: {
@@ -8,16 +12,16 @@ const db = factory({
     avatar: String,
   },
   comment: {
-    id: primaryKey(Number),
+    id: primaryKey(() => commentId++),
     createdAt: () => new Date(),
     body: String,
     upvoteCount: Number,
     userId: Number,
     parentId: Number,
-    articleId: Number
+    articleId: nullable(Number)
   },
   upvote: {
-    id: primaryKey(Number),
+    id: primaryKey(() => upvoteId++),
     userId: Number,
     commentId: Number,
     articleId: Number
@@ -29,17 +33,17 @@ const sampleUsers = [
   {
     id: 1,
     name: 'Rob Hope',
-    avatar: 'images/avatar-bob.png'
+    avatar: '/images/avatar-bob.png'
   },
   {
     id: 2,
     name: 'Sophie Brecht',
-    avatar: 'images/avatar-sophie.png'
+    avatar: '/images/avatar-sophie.png'
   },
   {
     id: 3,
     name: 'Cameron Lawrence',
-    avatar: 'images/avatar-cameron.png'
+    avatar: '/images/avatar-cameron.png'
   },
 ]
 
@@ -74,7 +78,7 @@ const sampleUpvotes = [
   {
     id: 1,
     articleId: 1,
-    commentId: 1,
+    commentId: 2,
     userId: 1,
   }
 ]
