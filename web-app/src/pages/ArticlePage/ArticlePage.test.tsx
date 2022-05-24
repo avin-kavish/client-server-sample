@@ -104,7 +104,7 @@ describe('ArticlePage', () => {
       const { findByText, findAllByText, getByText } = render(
         <ArticlePage />, { wrapper: Wrapper })
 
-      const [upvoteButton] = await findAllByText(/Upvote/)
+      const [ upvoteButton ] = await findAllByText(/Upvote/)
 
       fireEvent.click(upvoteButton)
 
@@ -115,6 +115,8 @@ describe('ArticlePage', () => {
       const { findByText, findAllByText, getByText } = render(
         <ArticlePage />, { wrapper: Wrapper })
 
+      console.log(mockDb.comment.findMany({}))
+
       await findByText('4 upvotes')
 
       const upvotedButtons = await findAllByText(/Upvoted/)
@@ -123,7 +125,6 @@ describe('ArticlePage', () => {
 
       fireEvent.click(upvoteButton)
 
-      console.log(mockDb.comment.findMany({}))
 
     })
   })

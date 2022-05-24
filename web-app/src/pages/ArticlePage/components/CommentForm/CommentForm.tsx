@@ -3,7 +3,7 @@ import { cx, fetchJson } from "lib/utils"
 import React, { FormEventHandler } from "react"
 import styles from './CommentForm.module.css'
 
-interface CommentForm {
+interface CommentFormProps {
   articleId: number
   inline?: boolean
   parentComment?: Comment
@@ -17,14 +17,14 @@ export default function CommentForm({
                                       currentUser,
                                       articleId,
                                       inline
-                                    }: CommentForm) {
+                                    }: CommentFormProps) {
 
   const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault()
 
     const commentInput = (event.target as HTMLFormElement).elements.namedItem('comment') as HTMLInputElement
 
-    const { data } = await fetchJson(`/v1/comments`, {
+    await fetchJson(`/v1/comments`, {
       body: commentInput.value,
       userId: currentUser?.id,
       parentId: parentComment?.id,
