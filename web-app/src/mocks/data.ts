@@ -17,8 +17,8 @@ const db = factory({
     body: String,
     upvoteCount: Number,
     userId: Number,
-    parentId: Number,
-    articleId: nullable(Number)
+    parentId: nullable(Number),
+    articleId: Number
   },
   upvote: {
     id: primaryKey(() => upvoteId++),
