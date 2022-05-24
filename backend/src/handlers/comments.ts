@@ -7,7 +7,7 @@ export function configureComments({ app }: { app: FastifyInstance }) {
 
   app.get('/api/v1/comments', {
     schema: {
-      body: T.Object({ articleId: T.Number() })
+      querystring: T.Object({ articleId: T.Number() })
     }
   }, getComments)
 
