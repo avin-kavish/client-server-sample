@@ -1,3 +1,4 @@
+import { matches } from 'lodash'
 import { Server } from "socket.io"
 import { kafka } from "./kafka"
 
@@ -9,15 +10,16 @@ async function initRealtime() {
     }
   })
 
-  const filterMap = new Map<string, object>()
+  const filterMap = new Map<string, (obj: any) => boolean>()
 
   io.on("connection", (socket) => {
 
     socket.on("subscribe", (eventSpec, cb) => {
       const [ model, action ] = eventSpec.event.split(':')
 
-      if (eventSpec.filter)
-        filterMap.set(socket.id, eventSpec.filter)
+      if (eventSpec.filter) {
+        filterMap.set(`${model}.${action}.${socket.id}`, matches(eventSpec.filter))
+      }
 
       console.log(`Subscribing: ${socket.id} to ${model}:${action}`)
       socket.join(`${model}:${action}`)
@@ -47,10 +49,27 @@ async function initRealtime() {
       const data = JSON.parse(message.value!.toString())
 
       const wildcardEvent = `${model}:*`
-      io.to(wildcardEvent).emit(wildcardEvent, { type: action, data })
-
       const actionEvent = `${model}:${action}`
-      io.to(actionEvent).emit(actionEvent, { type: action, data })
+
+      const wSockets = await io.to(wildcardEvent).allSockets()
+      wSockets.forEach(socket => {
+        const matcher = filterMap.get(`${model}.*.${socket}`)
+        if (!matcher) {
+          io.to(socket).emit(wildcardEvent, { type: action, data })
+        } else if (matcher(data)) {
+          io.to(socket).emit(wildcardEvent, { type: action, data })
+        }
+      })
+
+      const sockets = await io.to(actionEvent).allSockets()
+      sockets.forEach(socket => {
+        const matcher = filterMap.get(`${model}.${action}.${socket}`)
+        if (!matcher) {
+          io.to(socket).emit(actionEvent, { type: action, data })
+        } else if (matcher(data)) {
+          io.to(socket).emit(actionEvent, { type: action, data })
+        }
+      })
     }
   })
 
