@@ -8,7 +8,7 @@ services:
     volumes:
       - "zookeeper_data:/bitnami"
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      ALLOW_ANONYMOUS_LOGIN: yes
   kafka:
     image: docker.io/bitnami/kafka:3.1
     ports:
@@ -16,14 +16,42 @@ services:
     volumes:
       - "kafka_data:/bitnami"
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
     depends_on:
       - zookeeper
+  postgres:
+    image: docker.io/postgres:12
+    environment:
+      POSTGRES_PASSWORD: 123456
+  backend:
+    build: backend
+    ports:
+      - "3010:3010"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      KAFKA: kafka:9092
+      DATABASE_URL: postgresql://ghost_user:123456@postgres:5432/ghost_test?schema=public
+#    volumes:
+#      - ./backend:/usr/src/app
+    depends_on:
+      - postgres
+      - kafka
+  realtime:
+    build: realtime
+    ports:
+      - "3011:3011"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      - kafka
 
 volumes:
   zookeeper_data:
     driver: local
   kafka_data:
+    driver: local
+  postgres_data:
     driver: local
