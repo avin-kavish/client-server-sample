@@ -12,20 +12,6 @@ async function initRealtime() {
 
   const filterMap = new Map<string, (obj: any) => boolean>()
 
-  io.on("connection", (socket) => {
-
-    socket.on("subscribe", (eventSpec, cb) => {
-      const [ model, action ] = eventSpec.event.split(':')
-
-      if (eventSpec.filter) {
-        filterMap.set(`${model}.${action}.${socket.id}`, matches(eventSpec.filter))
-      }
-
-      console.log(`Subscribing: ${socket.id} to ${model}:${action}`)
-      socket.join(`${model}:${action}`)
-    })
-  })
-
   const consumer = kafka.consumer({
     groupId: 'realtime-api'
   })
@@ -41,6 +27,20 @@ async function initRealtime() {
       'upvotes.updated',
       'upvotes.deleted',
     ]
+  })
+
+  io.on("connection", (socket) => {
+
+    socket.on("subscribe", (eventSpec, cb) => {
+      const [ model, action ] = eventSpec.event.split(':')
+
+      if (eventSpec.filter) {
+        filterMap.set(`${model}.${action}.${socket.id}`, matches(eventSpec.filter))
+      }
+
+      console.log(`Subscribing: ${socket.id} to ${model}:${action}`)
+      socket.join(`${model}:${action}`)
+    })
   })
 
   await consumer.run({
