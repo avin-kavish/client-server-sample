@@ -30,6 +30,7 @@ services:
     environment:
       POSTGRES_PASSWORD: 123456
   backend:
+    image: docker.io/avinkavish/ghost-backend:latest
     build: backend
     ports:
       - "3010:3010"
@@ -42,6 +43,7 @@ services:
       - postgres
       - kafka
   realtime:
+    image: docker.io/avinkavish/ghost-realtime:latest
     build: realtime
     ports:
       - "3011:3011"
