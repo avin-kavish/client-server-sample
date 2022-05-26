@@ -28,9 +28,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: "ghost_user"
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: "ghost_test"
   backend:
-    image: docker.io/avinkavish/ghost-backend:latest
     build: backend
     ports:
       - "3010:3010"
@@ -43,7 +44,6 @@ services:
       - postgres
       - kafka
   realtime:
-    image: docker.io/avinkavish/ghost-realtime:latest
     build: realtime
     ports:
       - "3011:3011"
