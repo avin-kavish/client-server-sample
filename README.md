@@ -18,7 +18,7 @@ This application is packaged using docker compose.
 
 ```sh
 docker compose up # dev build
-docker compose -f docker-compose.yml docker-compose.prod.yml up # prod build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up # prod build
 ```
 
 2. Open `psql` session in the postgres container
@@ -37,7 +37,7 @@ create database ghost_test;
 alter database ghost_test owner to ghost_user;
 ```
 
-4. Run schema migrations defined in the backend
+4. Run schema migrations from the backend container
 
 ```sh
 docker exec -it <container-id> yarn prisma migrate deploy
