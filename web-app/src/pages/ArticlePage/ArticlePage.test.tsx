@@ -4,7 +4,6 @@ import io from 'socket.io-client'
 import MockedSocket from "socket.io-mock"
 import { SWRConfig } from "swr"
 import { dataFetcher } from "../../lib/utils"
-import { mockDb } from "../../mocks/data"
 import { mockSocket } from "../../mocks/socket"
 import ArticlePage from "./ArticlePage"
 
@@ -111,21 +110,18 @@ describe('ArticlePage', () => {
       await findByText('1 upvotes')
     })
 
+    // When developing this test it was discovered that state is being carried over
+    // from test to test. Ideally, it should not. TODO: Fix this.
     test('comment upvotes can be removed', async () => {
       const { findByText, findAllByText, getByText } = render(
         <ArticlePage />, { wrapper: Wrapper })
 
-      console.log(mockDb.comment.findMany({}))
-
-      await findByText('4 upvotes')
-
       const upvotedButtons = await findAllByText(/Upvoted/)
-      console.log(upvotedButtons)
-      const [ upvoteButton ] = upvotedButtons
+      const [ _, upvoteButton ] = upvotedButtons
 
       fireEvent.click(upvoteButton)
 
-
+      await findByText('4 upvotes')
     })
   })
 })
